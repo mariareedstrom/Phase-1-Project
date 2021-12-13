@@ -63,7 +63,7 @@ class Cat {
   }
 }
 
-// API code
+// API code:
 // Fetch request, get fetch for first four cats
 
 /**
@@ -101,3 +101,12 @@ function initialize() {
 }
 
 initialize();
+
+//Cat Cards
+
+/**
+ * Create a cat card, with img, like btn, mate btn and comment section.
+ *
+ * @param {Cat} cat the fetched cat that will be rendered to the card.
+ */
+function renderCatCard(cat) {}
