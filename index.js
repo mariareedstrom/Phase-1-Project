@@ -89,24 +89,62 @@ function fetchCat(cat) {
   );
 }
 
-//Get data and render cats to the DOM
-function initialize() {
-  // create first cat and fetch
-  const firstCat = Cat.generateRandom();
-  fetchCat(firstCat).then((catUrl) => {
-    // apply to img tag
-    const img = document.querySelector("#catimg");
-    img.src = catUrl;
-  });
-}
-
-initialize();
-
 //Cat Cards
 
 /**
- * Create a cat card, with img, like btn, mate btn and comment section.
+ * Create a cat card
  *
- * @param {Cat} cat the fetched cat that will be rendered to the card.
+ * @param {Cat} cat the cat that will be rendered
+ *
+ * @returns {HTMLElement} a cat card DOM element
  */
-function renderCatCard(cat) {}
+function renderCatCard(cat) {
+  const catCard = document.createElement("section");
+  catCard.classList.add("card", "hoverable", "cat-card");
+  catCard.dataset.dna = cat.dna;
+
+  const cardImg = document.createElement("div");
+  cardImg.classList.add("card-image");
+
+  const catImg = document.createElement("img");
+  cardImg.append(catImg);
+
+  const cardAction = document.createElement("footer");
+  cardAction.classList.add("card-action");
+
+  const favorite = document.createElement("span");
+  favorite.classList.add("favorite");
+  favorite.textContent = "♡";
+
+  cardAction.append(favorite);
+  catCard.append(cardImg, cardAction);
+
+  return catCard;
+}
+
+//Get data and render cats to the DOM
+function initialize() {
+  const maxOrigCats = 4;
+  for (let i = 0; i < maxOrigCats; i++) {
+    // generate random Cat
+    const cat = Cat.generateRandom();
+    // render cat card
+    const catCard = renderCatCard(cat);
+    // fetch cat
+    fetchCat(cat).then((catUrl) => {
+      // apply to img tag
+      const img = catCard.querySelector(".card-image img");
+      img.src = catUrl;
+    });
+    // append card to the OG
+    const column = document.createElement("div");
+    column.classList.add("col", "s6", "m3");
+
+    const catGrid = document.querySelector("#catGridOrig");
+
+    column.append(catCard);
+    catGrid.append(column);
+  }
+}
+
+initialize();
