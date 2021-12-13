@@ -62,3 +62,42 @@ class Cat {
     return new Cat(newDna);
   }
 }
+
+// API code
+// Fetch request, get fetch for first four cats
+
+/**
+ * Fetch cat from API using DNA.
+ *
+ * @param {Cat} cat the cat that will be fetched
+ *
+ * @returns {Promise<string>} cat img src
+ */
+function fetchCat(cat) {
+  // build URL from cat DNA
+  const catUrl = `https://robohash.org/${cat.dna}?set=set4`;
+  // fetch cat image from API
+  return (
+    fetch(catUrl)
+      .then((resp) => {
+        return resp.blob();
+      })
+      // convert binary into img src using "blob"
+      .then((catBlob) => {
+        return URL.createObjectURL(catBlob);
+      })
+  );
+}
+
+//Get data and render cats to the DOM
+function initialize() {
+  // create first cat and fetch
+  const firstCat = Cat.generateRandom();
+  fetchCat(firstCat).then((catUrl) => {
+    // apply to img tag
+    const img = document.querySelector("#catimg");
+    img.src = catUrl;
+  });
+}
+
+initialize();
