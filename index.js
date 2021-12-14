@@ -100,7 +100,7 @@ function fetchCat(cat) {
  */
 function renderCatCard(cat) {
   const catCard = document.createElement("section");
-  catCard.classList.add("card", "hoverable", "cat-card");
+  catCard.classList.add("card", "hoverable", "growable", "cat-card");
   catCard.dataset.dna = cat.dna;
 
   const cardImg = document.createElement("div");
@@ -148,3 +148,40 @@ function initialize() {
 }
 
 initialize();
+
+//Mark cat as selected by adding "selected" dataset and class
+/**
+ *
+ * @param {string} dna the cat dna to use for lookup
+ *
+ */
+function selectCatByDNA(dna) {
+  // use document.querySelector("[data-dna=]") to find cat by DNA
+  const selectedCatCard = document.querySelector(`[data-dna=${dna}]`);
+
+  // check if property is present, if not add selected dataset and class
+  if ("selected" in selectedCatCard.dataset === false) {
+    // set data-select
+    selectedCatCard.dataset.selected = "true";
+
+    // set selected class
+    selectedCatCard.classList.add("selected");
+  }
+}
+
+// Deselcet cat by removing "selected" dataset and class
+/**
+ *
+ * @param {string} dna the cat to deselect
+ *
+ */
+function deSelectCatByDNA(dna) {
+  // use document.querySelector("[data-dna=]") to find cat by DNA
+  const selectedCatCard = document.querySelector(`[data-dna=${dna}]`);
+
+  // check if property is present, if it is remove selected dataset and class
+  if ("selected" in selectedCatCard.dataset === true) {
+    delete selectedCatCard.dataset.selected;
+    selectedCatCard.classList.remove("selected");
+  }
+}
