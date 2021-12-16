@@ -64,8 +64,8 @@ class Cat {
 }
 
 // API code:
-// Fetch request, get fetch for first four cats
 
+// Fetch request, get fetch for first four cats
 /**
  * Fetch cat from API using DNA.
  *
@@ -90,7 +90,6 @@ function fetchCat(cat) {
 }
 
 //Cat Cards
-
 /**
  * Create a cat card
  *
@@ -119,6 +118,17 @@ function renderCatCard(cat) {
   cardAction.append(favorite);
   catCard.append(cardImg, cardAction);
 
+  // fetch img
+  fetchCat(cat).then((catUrl) => {
+    // apply to img tag
+    const img = catCard.querySelector(".card-image img");
+    img.src = catUrl;
+  });
+
+  // add handlers
+  favorite.addEventListener("click", clickCatFavoriteHandler);
+  catCard.addEventListener("click", clickCatHandler);
+
   return catCard;
 }
 
@@ -130,26 +140,16 @@ function initialize() {
     const cat = Cat.generateRandom();
     // render cat card
     const catCard = renderCatCard(cat);
-    // fetch cat
-    fetchCat(cat).then((catUrl) => {
-      // apply to img tag
-      const img = catCard.querySelector(".card-image img");
-      img.src = catUrl;
-    });
+
     // append card to the OG
-    const column = document.createElement("div");
-    column.classList.add("col", "s6", "m3");
 
-    const catGrid = document.querySelector("#catGridOrig");
-
-    column.append(catCard);
-    catGrid.append(column);
+    const grid = document.querySelector("#catGridOrig");
+    appendCatCardToGrid(grid, catCard);
   }
 }
 
 initialize();
 
-//Mark cat as selected by adding "selected" dataset and class
 /**
  *
  * @param {string} dna the cat dna to use for lookup
@@ -161,21 +161,17 @@ function selectCatByDNA(dna) {
 
   // check if property is present, if not add selected dataset and class
   if ("selected" in selectedCatCard.dataset === false) {
-    // set data-select
     selectedCatCard.dataset.selected = "true";
-
-    // set selected class
     selectedCatCard.classList.add("selected");
   }
 }
 
-// Deselcet cat by removing "selected" dataset and class
 /**
  *
- * @param {string} dna the cat to deselect
+ * @param {string} dna of the cat to deselect
  *
  */
-function deSelectCatByDNA(dna) {
+function deselectCatByDNA(dna) {
   // use document.querySelector("[data-dna=]") to find cat by DNA
   const selectedCatCard = document.querySelector(`[data-dna=${dna}]`);
 
@@ -184,4 +180,75 @@ function deSelectCatByDNA(dna) {
     delete selectedCatCard.dataset.selected;
     selectedCatCard.classList.remove("selected");
   }
+}
+
+//Function to mate two selected cats by DNA
+/**
+ *
+ * @param {string} catADNA from
+ * @param {string} catBDNA
+ */
+function mateCatsByDNA(catADNA, catBDNA) {
+  // instantiate selected cat
+  const selectedCat = new Cat(catADNA);
+  // instantiate mate
+  const mateCat = new Cat(catBDNA);
+  const newCat = selectedCat.mate(mateCat);
+  // append cat card to cat grid
+  const catCard = renderCatCard(newCat);
+
+  const grid = document.querySelector("#catGridNew");
+  appendCatCardToGrid(grid, catCard);
+}
+
+/**
+ *
+ * @param {Element} grid
+ * @param {Element} catCard
+ */
+function appendCatCardToGrid(grid, catCard) {
+  const column = document.createElement("div");
+  column.classList.add("col", "s6", "m3");
+  column.append(catCard);
+  grid.append(column);
+}
+
+// Event listeners and handlers
+
+/**
+ *
+ * @param {Event} e
+ */
+function clickCatHandler(e) {
+  const selectedCatCard = e.target.closest("[data-dna]");
+  const dna = selectedCatCard.dataset.dna;
+  const isSlected = "selected" in selectedCatCard.dataset === true;
+  const firstMateCard = document.querySelector(".cat-card[data-selected=true]");
+  const hasMate = firstMateCard !== null;
+
+  // if cat already selected, deselect
+  if (isSlected) {
+    deselectCatByDNA(dna);
+  }
+  // mate if different cat currently selected
+  else if (hasMate) {
+    const mateDNA = firstMateCard.dataset.dna;
+    mateCatsByDNA(dna, mateDNA);
+    deselectCatByDNA(mateDNA);
+  }
+  // select since nothing selected
+  else {
+    selectCatByDNA(dna);
+  }
+}
+
+/**
+ *
+ * @param {Event} e
+ */
+function clickCatFavoriteHandler(e) {
+  e.stopPropagation();
+
+  const selectedCatFavorite = e.target;
+  console.log(selectedCatFavorite);
 }
