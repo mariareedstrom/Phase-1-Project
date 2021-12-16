@@ -141,7 +141,7 @@ function initialize() {
     // render cat card
     const catCard = renderCatCard(cat);
 
-    // append card to the OG
+    // append card to the origial grid
 
     const grid = document.querySelector("#catGridOrig");
     appendCatCardToGrid(grid, catCard);
@@ -159,7 +159,7 @@ function selectCatByDNA(dna) {
   // use document.querySelector("[data-dna=]") to find cat by DNA
   const selectedCatCard = document.querySelector(`[data-dna=${dna}]`);
 
-  // check if property is present, if not add selected dataset and class
+  // check if property is present, if not add selected to dataset and class
   if ("selected" in selectedCatCard.dataset === false) {
     selectedCatCard.dataset.selected = "true";
     selectedCatCard.classList.add("selected");
@@ -185,8 +185,8 @@ function deselectCatByDNA(dna) {
 //Function to mate two selected cats by DNA
 /**
  *
- * @param {string} catADNA from
- * @param {string} catBDNA
+ * @param {string} catADNA from selected cat
+ * @param {string} catBDNA from previously selected cat (mate)
  */
 function mateCatsByDNA(catADNA, catBDNA) {
   // instantiate selected cat
@@ -194,26 +194,28 @@ function mateCatsByDNA(catADNA, catBDNA) {
   // instantiate mate
   const mateCat = new Cat(catBDNA);
   const newCat = selectedCat.mate(mateCat);
-  // append cat card to cat grid
-  const catCard = renderCatCard(newCat);
 
+  // render and append cat card to cat grid
+  const catCard = renderCatCard(newCat);
   const grid = document.querySelector("#catGridNew");
   appendCatCardToGrid(grid, catCard);
 }
 
 /**
  *
- * @param {Element} grid
- * @param {Element} catCard
+ * @param {Element} grid to which card will be appended
+ * @param {Element} catCard card to append to grid
  */
 function appendCatCardToGrid(grid, catCard) {
+  // set columns
   const column = document.createElement("div");
   column.classList.add("col", "s6", "m3");
+  // append card to column, and column to grid
   column.append(catCard);
   grid.append(column);
 }
 
-// Event listeners and handlers
+// Event  handlers
 
 /**
  *
@@ -242,13 +244,21 @@ function clickCatHandler(e) {
   }
 }
 
+// handle heart button
 /**
  *
  * @param {Event} e
  */
 function clickCatFavoriteHandler(e) {
+  // prevent event from bubbling
   e.stopPropagation();
 
   const selectedCatFavorite = e.target;
-  console.log(selectedCatFavorite);
+  const like = selectedCatFavorite.textContent;
+
+  if (like === "♡") {
+    selectedCatFavorite.textContent = "❤️";
+  } else {
+    selectedCatFavorite.textContent = "♡";
+  }
 }
