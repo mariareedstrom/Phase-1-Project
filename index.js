@@ -94,10 +94,11 @@ function fetchCat(cat) {
  * Create a cat card
  *
  * @param {Cat} cat the cat that will be rendered
+ * @param {boolean} canBeFreed true value allows cat to be removed
  *
  * @returns {HTMLElement} a cat card DOM element
  */
-function renderCatCard(cat) {
+function renderCatCard(cat, canBeFreed) {
   const catCard = document.createElement("section");
   catCard.classList.add("card", "hoverable", "growable", "cat-card");
   catCard.dataset.dna = cat.dna;
@@ -116,11 +117,16 @@ function renderCatCard(cat) {
   favorite.textContent = "♡";
   favorite.style.cursor = "pointer";
 
-  const setFree = document.createElement("button");
-  setFree.classList.add("setFree");
-  setFree.textContent = "Set Free! ";
+  if (canBeFreed) {
+    const setFree = document.createElement("button");
+    setFree.classList.add("setFree");
+    setFree.textContent = "Set Free! ";
 
-  cardAction.append(favorite, setFree);
+    cardAction.append(setFree);
+    setFree.addEventListener("click", setFreeHandler);
+  }
+
+  cardAction.append(favorite);
   catCard.append(cardImg, cardAction);
 
   // fetch img
@@ -133,7 +139,6 @@ function renderCatCard(cat) {
   // add event listeners
   favorite.addEventListener("click", clickCatFavoriteHandler);
   catCard.addEventListener("click", clickCatHandler);
-  setFree.addEventListener("click", setFreeHandler);
 
   return catCard;
 }
@@ -145,7 +150,7 @@ function initialize() {
     // generate random Cat
     const cat = Cat.generateRandom();
     // render cat card
-    const catCard = renderCatCard(cat);
+    const catCard = renderCatCard(cat, false);
 
     // append card to the origial grid
 
@@ -202,7 +207,7 @@ function mateCatsByDNA(catADNA, catBDNA) {
   const newCat = selectedCat.mate(mateCat);
 
   // render and append cat card to cat grid
-  const catCard = renderCatCard(newCat);
+  const catCard = renderCatCard(newCat, true);
   const grid = document.querySelector("#catGridNew");
   appendCatCardToGrid(grid, catCard);
 }
@@ -251,7 +256,7 @@ function clickCatHandler(e) {
   }
 }
 
-// handle heart button
+// Handle Heart button
 /**
  *
  * @param {Event} e
@@ -270,7 +275,7 @@ function clickCatFavoriteHandler(e) {
   }
 }
 
-// Handle Set Free!
+// Handle Set Free! button
 /**
  *
  * @param {Event} e
