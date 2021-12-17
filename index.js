@@ -114,8 +114,13 @@ function renderCatCard(cat) {
   const favorite = document.createElement("span");
   favorite.classList.add("favorite");
   favorite.textContent = "♡";
+  favorite.style.cursor = "pointer";
 
-  cardAction.append(favorite);
+  const setFree = document.createElement("button");
+  setFree.classList.add("setFree");
+  setFree.textContent = "Set Free! ";
+
+  cardAction.append(favorite, setFree);
   catCard.append(cardImg, cardAction);
 
   // fetch img
@@ -125,9 +130,10 @@ function renderCatCard(cat) {
     img.src = catUrl;
   });
 
-  // add handlers
+  // add event listeners
   favorite.addEventListener("click", clickCatFavoriteHandler);
   catCard.addEventListener("click", clickCatHandler);
+  setFree.addEventListener("click", setFreeHandler);
 
   return catCard;
 }
@@ -215,8 +221,9 @@ function appendCatCardToGrid(grid, catCard) {
   grid.append(column);
 }
 
-// Event  handlers
+// Event  handlers:
 
+// Handle click cat
 /**
  *
  * @param {Event} e
@@ -261,4 +268,18 @@ function clickCatFavoriteHandler(e) {
   } else {
     selectedCatFavorite.textContent = "♡";
   }
+}
+
+// Handle Set Free!
+/**
+ *
+ * @param {Event} e
+ */
+function setFreeHandler(e) {
+  // prevent event from bubbling
+  e.stopPropagation();
+
+  const catToSetFree = e.target;
+  catToSetFree.parentNode.parentNode.remove();
+  //
 }
