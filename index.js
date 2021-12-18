@@ -95,10 +95,11 @@ function fetchCat(cat) {
  *
  * @param {Cat} cat the cat that will be rendered
  * @param {boolean} canBeFreed true value allows cat to be removed
+ * @param {[catADNA: string, catBDNA: string]} parents dna of two cat parents
  *
  * @returns {HTMLElement} a cat card DOM element
  */
-function renderCatCard(cat, canBeFreed) {
+function renderCatCard(cat, canBeFreed = false, parents = []) {
   const catCard = document.createElement("section");
   catCard.classList.add("card", "hoverable", "growable", "cat-card");
   catCard.dataset.dna = cat.dna;
@@ -117,16 +118,36 @@ function renderCatCard(cat, canBeFreed) {
   favorite.textContent = "♡";
   favorite.style.cursor = "pointer";
 
+  cardAction.append(favorite);
+
   if (canBeFreed) {
     const setFree = document.createElement("button");
-    setFree.classList.add("setFree");
-    setFree.textContent = "Set Free! ";
+    setFree.classList.add("set-free");
+    setFree.textContent = "Set Free!";
 
     cardAction.append(setFree);
     setFree.addEventListener("click", setFreeHandler);
   }
 
-  cardAction.append(favorite);
+  if (parents.length === 2) {
+    parents.forEach((dna) => {
+      const parentCat = new Cat(dna);
+
+      const parentThumb = document.createElement("div");
+      parentThumb.classList.add("parent-thumb");
+
+      const parentImg = document.createElement("img");
+      parentThumb.append(parentImg);
+
+      fetchCat(parentCat).then((catUrl) => {
+        // apply to img tag
+        parentImg.src = catUrl;
+      });
+
+      cardAction.append(parentThumb);
+    });
+  }
+
   catCard.append(cardImg, cardAction);
 
   // fetch img
@@ -143,25 +164,8 @@ function renderCatCard(cat, canBeFreed) {
   return catCard;
 }
 
-//Get data and render cats to the DOM
-function initialize() {
-  const maxOrigCats = 4;
-  for (let i = 0; i < maxOrigCats; i++) {
-    // generate random Cat
-    const cat = Cat.generateRandom();
-    // render cat card
-    const catCard = renderCatCard(cat, false);
-
-    // append card to the origial grid
-
-    const grid = document.querySelector("#catGridOrig");
-    appendCatCardToGrid(grid, catCard);
-  }
-}
-
-initialize();
-
 /**
+ * Sets selected state on cat card.
  *
  * @param {string} dna the cat dna to use for lookup
  *
@@ -207,7 +211,7 @@ function mateCatsByDNA(catADNA, catBDNA) {
   const newCat = selectedCat.mate(mateCat);
 
   // render and append cat card to cat grid
-  const catCard = renderCatCard(newCat, true);
+  const catCard = renderCatCard(newCat, true, [catADNA, catBDNA]);
   const grid = document.querySelector("#catGridNew");
   appendCatCardToGrid(grid, catCard);
 }
@@ -286,5 +290,26 @@ function setFreeHandler(e) {
 
   const catToSetFree = e.target;
   catToSetFree.parentNode.parentNode.remove();
-  //
+}
+
+//Initialize: get data and render cats to the DOM
+function initialize() {
+  const maxOrigCats = 4;
+  for (let i = 0; i < maxOrigCats; i++) {
+    // generate random Cat
+    const cat = Cat.generateRandom();
+    // render cat card
+    const catCard = renderCatCard(cat, false);
+
+    // append card to the origial grid
+
+    const grid = document.querySelector("#catGridOrig");
+    appendCatCardToGrid(grid, catCard);
+  }
+}
+
+// Set up prevent initialize for testing purposes
+let preventInitialize;
+if (!preventInitialize) {
+  initialize();
 }
