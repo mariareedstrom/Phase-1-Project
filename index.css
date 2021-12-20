@@ -13,3 +13,28 @@
     0 6px 20px 0 rgb(0 0 0 / 19%);
   box-shadow: 0 8px 17px 0 rgb(0 0 0 / 20%), 0 6px 20px 0 rgb(0 0 0 / 19%);
 }
+
+.parent-img {
+  max-width: 30%;
+  max-height: 30%;
+}
+
+.parent-thumb {
+  display: inline-block;
+}
+
+.set-free {
+  border-radius: 12px;
+  border: none;
+  background-color: indianred;
+  color: white;
+  padding: 8px 1px;
+  text-align: center;
+  font-size: 12px;
+  margin: auto;
+  opacity: 0.6;
+  transition: 0.3s;
+  display: inline-block;
+  text-decoration: none;
+  cursor: pointer;
+}
