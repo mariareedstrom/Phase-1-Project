@@ -110,6 +110,9 @@ function renderCatCard(cat, canBeFreed = false, parents = []) {
   const catImg = document.createElement("img");
   cardImg.append(catImg);
 
+  const cardComment = document.createElement("div");
+  cardComment.classList.add("card-content");
+
   const cardAction = document.createElement("footer");
   cardAction.classList.add("card-action");
 
@@ -119,6 +122,9 @@ function renderCatCard(cat, canBeFreed = false, parents = []) {
   favorite.style.cursor = "pointer";
 
   cardAction.append(favorite);
+
+  const parentThumb = document.createElement("div");
+  parentThumb.classList.add("parent-thumb");
 
   if (canBeFreed) {
     const setFree = document.createElement("button");
@@ -133,22 +139,22 @@ function renderCatCard(cat, canBeFreed = false, parents = []) {
     parents.forEach((dna) => {
       const parentCat = new Cat(dna);
 
-      const parentThumb = document.createElement("div");
-      parentThumb.classList.add("parent-thumb");
-
       const parentImg = document.createElement("img");
+      parentImg.classList.add("parent-img");
+
       parentThumb.append(parentImg);
+      cardComment.textContent = "Lineage: ";
 
       fetchCat(parentCat).then((catUrl) => {
         // apply to img tag
         parentImg.src = catUrl;
       });
 
-      cardAction.append(parentThumb);
+      cardComment.append(parentThumb);
     });
   }
 
-  catCard.append(cardImg, cardAction);
+  catCard.append(cardImg, cardComment, cardAction);
 
   // fetch img
   fetchCat(cat).then((catUrl) => {
@@ -248,7 +254,7 @@ function clickCatHandler(e) {
   if (isSlected) {
     deselectCatByDNA(dna);
   }
-  // mate if different cat currently selected
+  // mate if different cat currently selected, then set to deselect
   else if (hasMate) {
     const mateDNA = firstMateCard.dataset.dna;
     mateCatsByDNA(dna, mateDNA);
