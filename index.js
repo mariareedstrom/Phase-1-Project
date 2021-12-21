@@ -99,10 +99,11 @@ function fetchCat(cat) {
  *
  * @returns {HTMLElement} a cat card DOM element
  */
-function renderCatCard(cat, canBeFreed = false, parents = []) {
+function renderCatCard(cat, isKitten = true, parents = []) {
   const catCard = document.createElement("section");
   catCard.classList.add("card", "hoverable", "growable", "cat-card");
   catCard.dataset.dna = cat.dna;
+  catCard.dataset.id = cat.id;
 
   const cardImg = document.createElement("div");
   cardImg.classList.add("card-image");
@@ -110,51 +111,53 @@ function renderCatCard(cat, canBeFreed = false, parents = []) {
   const catImg = document.createElement("img");
   cardImg.append(catImg);
 
-  const cardComment = document.createElement("div");
-  cardComment.classList.add("card-content");
+  catCard.append(cardImg);
 
-  const cardAction = document.createElement("footer");
-  cardAction.classList.add("card-action");
+  if (isKitten) {
+    const cardComment = document.createElement("div");
+    cardComment.classList.add("card-content");
 
-  const favorite = document.createElement("span");
-  favorite.classList.add("favorite");
-  favorite.textContent = "♡";
-  favorite.style.cursor = "pointer";
+    const cardAction = document.createElement("footer");
+    cardAction.classList.add("card-action");
 
-  cardAction.append(favorite);
+    const favorite = document.createElement("span");
+    favorite.classList.add("favorite");
+    favorite.textContent = "♡";
+    favorite.style.cursor = "pointer";
 
-  const parentThumb = document.createElement("div");
-  parentThumb.classList.add("parent-thumb");
+    cardAction.append(favorite);
 
-  if (canBeFreed) {
+    const parentThumb = document.createElement("div");
+    parentThumb.classList.add("parent-thumb");
+
     const setFree = document.createElement("button");
     setFree.classList.add("set-free");
     setFree.textContent = "Set Free!";
 
     cardAction.append(setFree);
     setFree.addEventListener("click", setFreeHandler);
-  }
 
-  if (parents.length === 2) {
-    parents.forEach((dna) => {
-      const parentCat = new Cat(dna);
+    if (parents.length === 2) {
+      parents.forEach((dna) => {
+        const parentCat = new Cat(dna);
 
-      const parentImg = document.createElement("img");
-      parentImg.classList.add("parent-img");
+        const parentImg = document.createElement("img");
+        parentImg.classList.add("parent-img");
 
-      parentThumb.append(parentImg);
-      cardComment.textContent = "Lineage: ";
+        parentThumb.append(parentImg);
+        cardComment.textContent = "Lineage: ";
 
-      fetchCat(parentCat).then((catUrl) => {
-        // apply to img tag
-        parentImg.src = catUrl;
+        fetchCat(parentCat).then((catUrl) => {
+          // apply to img tag
+          parentImg.src = catUrl;
+        });
+
+        cardComment.append(parentThumb);
       });
-
-      cardComment.append(parentThumb);
-    });
+    }
+    catCard.append(cardComment, cardAction);
+    favorite.addEventListener("click", clickCatFavoriteHandler);
   }
-
-  catCard.append(cardImg, cardComment, cardAction);
 
   // fetch img
   fetchCat(cat).then((catUrl) => {
@@ -163,8 +166,6 @@ function renderCatCard(cat, canBeFreed = false, parents = []) {
     img.src = catUrl;
   });
 
-  // add event listeners
-  favorite.addEventListener("click", clickCatFavoriteHandler);
   catCard.addEventListener("click", clickCatHandler);
 
   return catCard;
@@ -283,6 +284,24 @@ function clickCatFavoriteHandler(e) {
   } else {
     selectedCatFavorite.textContent = "♡";
   }
+
+  const selectedCatCard = e.target.closest("[data-dna]");
+
+  saveFavorite({
+    dna: selectedCatCard.dataset.dna,
+  });
+}
+
+function saveFavorite(catObj) {
+  fetch("http://localhost:3000/cats", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(catObj),
+  })
+    .then((resp) => resp.json())
+    .then((cat) => console.log(cat));
 }
 
 // Handle Set Free! button
