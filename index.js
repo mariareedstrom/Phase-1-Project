@@ -364,8 +364,13 @@ function setFreeHandler(e) {
   // prevent event from bubbling
   e.stopPropagation();
 
-  const catToSetFree = e.target;
-  catToSetFree.parentNode.parentNode.remove();
+  const catCard = e.target.closest("[data-dna]");
+  const catId = catCard.dataset.id;
+  if (catId) {
+    removeFavorite(catId);
+  }
+
+  catCard.remove();
 }
 
 // Fetch favorite cats on page load
