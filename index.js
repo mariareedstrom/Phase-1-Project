@@ -370,7 +370,7 @@ function setFreeHandler(e) {
     removeFavorite(catId);
   }
 
-  catCard.remove();
+  catCard.closest(".col").remove();
 }
 
 // Fetch favorite cats on page load
