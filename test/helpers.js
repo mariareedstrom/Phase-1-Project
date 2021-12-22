@@ -1,11 +1,16 @@
 const chai = require("chai");
-global.expect = chai.expect;
 const fs = require("fs");
 const jsdom = require("mocha-jsdom");
 const path = require("path");
 const babel = require("@babel/core");
-const url = "http://localhost";
 
+global.expect = chai.expect;
+require("isomorphic-fetch");
+
+chai.use(require("chai-dom"));
+chai.use(require("chai-fetch-mock"));
+
+const url = "http://localhost";
 const html = fs.readFileSync(
   path.resolve(__dirname, "..", "index.html"),
   "utf-8"

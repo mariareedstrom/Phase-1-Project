@@ -28,7 +28,7 @@
   border: none;
   background-color: indianred;
   color: white;
-  padding: 8px 1px;
+  padding: 8px 4px;
   text-align: center;
   font-size: 12px;
   margin: auto;
@@ -37,4 +37,16 @@
   display: inline-block;
   text-decoration: none;
   cursor: pointer;
+}
+
+.set-free:hover {
+  opacity: 1;
+}
+
+header.container {
+  color: indianred;
+}
+
+.favorites {
+  background-color: indianred;
 }

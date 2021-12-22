@@ -26,8 +26,11 @@ class Cat {
    * Creates new cat from provided DNA sequence.
    *
    * @param {string} dna a string of 32 characters with range `[A-Z]`.
+   * @param {[catADNA: string, catBDNA: string]} parents dna of two cat parents
+   * @param {number} id of persisted cat
+   *
    */
-  constructor(dna) {
+  constructor(dna, parents = [], id = null) {
     // validate DNA
     const regex = new RegExp("[A-Z]{32}");
     if (!regex.test(dna)) {
@@ -35,13 +38,40 @@ class Cat {
     }
     // set DNA
     this._dna = dna;
+
+    // set id
+    this._id = id;
+
+    // set parents
+    this._parents = parents;
   }
 
   /**
-   * DNA sequence of cat
+   * @returns {string} DNA sequence of cat
    */
   get dna() {
     return this._dna;
+  }
+
+  /**
+   * @returns {number} id of cat
+   */
+  get id() {
+    return this._id;
+  }
+
+  /**
+   * @returns {[catADNA: string, catBDNA: string]} parents of cat
+   */
+  get parents() {
+    return this._parents;
+  }
+
+  /**
+   * @returns {boolean} true if parents not empty
+   */
+  get isKitten() {
+    return this._parents && this._parents.length !== 0;
   }
 
   /**
@@ -51,15 +81,17 @@ class Cat {
    * @returns {Cat} new cat from combined DNA.
    */
   mate(cat) {
+    const parents = [this.dna, cat.dna];
+
+    // generate new dna
     const a = this.dna.slice(0, 16).split("");
     const b = cat.dna.slice(0, 16).split("");
 
     let newDna = "";
-
     for (let i = 0; i < a.length && i < b.length; i++) {
       newDna += a[i] + b[i];
     }
-    return new Cat(newDna);
+    return new Cat(newDna, parents);
   }
 }
 
@@ -94,16 +126,13 @@ function fetchCat(cat) {
  * Create a cat card
  *
  * @param {Cat} cat the cat that will be rendered
- * @param {boolean} canBeFreed true value allows cat to be removed
- * @param {[catADNA: string, catBDNA: string]} parents dna of two cat parents
  *
  * @returns {HTMLElement} a cat card DOM element
  */
-function renderCatCard(cat, isKitten = true, parents = []) {
+function renderCatCard(cat) {
   const catCard = document.createElement("section");
   catCard.classList.add("card", "hoverable", "growable", "cat-card");
   catCard.dataset.dna = cat.dna;
-  catCard.dataset.id = cat.id;
 
   const cardImg = document.createElement("div");
   cardImg.classList.add("card-image");
@@ -113,7 +142,7 @@ function renderCatCard(cat, isKitten = true, parents = []) {
 
   catCard.append(cardImg);
 
-  if (isKitten) {
+  if (cat.isKitten) {
     const cardComment = document.createElement("div");
     cardComment.classList.add("card-content");
 
@@ -122,8 +151,14 @@ function renderCatCard(cat, isKitten = true, parents = []) {
 
     const favorite = document.createElement("span");
     favorite.classList.add("favorite");
-    favorite.textContent = "♡";
     favorite.style.cursor = "pointer";
+
+    if (cat.id) {
+      favorite.textContent = "❤️";
+      catCard.dataset.id = cat.id;
+    } else {
+      favorite.textContent = "♡";
+    }
 
     cardAction.append(favorite);
 
@@ -137,24 +172,25 @@ function renderCatCard(cat, isKitten = true, parents = []) {
     cardAction.append(setFree);
     setFree.addEventListener("click", setFreeHandler);
 
-    if (parents.length === 2) {
-      parents.forEach((dna) => {
-        const parentCat = new Cat(dna);
+    cat.parents.forEach((dna, i) => {
+      const parentCat = new Cat(dna);
 
-        const parentImg = document.createElement("img");
-        parentImg.classList.add("parent-img");
+      const parentImg = document.createElement("img");
+      parentImg.classList.add("parent-img");
 
-        parentThumb.append(parentImg);
-        cardComment.textContent = "Lineage: ";
+      parentThumb.append(parentImg);
+      cardComment.textContent = "Lineage: ";
 
-        fetchCat(parentCat).then((catUrl) => {
-          // apply to img tag
-          parentImg.src = catUrl;
-        });
-
-        cardComment.append(parentThumb);
+      fetchCat(parentCat).then((catUrl) => {
+        // apply to img tag
+        parentImg.src = catUrl;
       });
-    }
+
+      cardComment.append(parentThumb);
+      // store parent DNA in dataset
+      catCard.dataset[`parent${i}`] = dna;
+    });
+
     catCard.append(cardComment, cardAction);
     favorite.addEventListener("click", clickCatFavoriteHandler);
   }
@@ -218,9 +254,10 @@ function mateCatsByDNA(catADNA, catBDNA) {
   const newCat = selectedCat.mate(mateCat);
 
   // render and append cat card to cat grid
-  const catCard = renderCatCard(newCat, true, [catADNA, catBDNA]);
+  const newCatCard = renderCatCard(newCat);
+
   const grid = document.querySelector("#catGridNew");
-  appendCatCardToGrid(grid, catCard);
+  appendCatCardToGrid(grid, newCatCard);
 }
 
 /**
@@ -278,20 +315,25 @@ function clickCatFavoriteHandler(e) {
 
   const selectedCatFavorite = e.target;
   const like = selectedCatFavorite.textContent;
+  const selectedCatCard = e.target.closest("[data-dna]");
 
   if (like === "♡") {
     selectedCatFavorite.textContent = "❤️";
+    saveFavorite({
+      dna: selectedCatCard.dataset.dna,
+      parent0: selectedCatCard.dataset.parent0,
+      parent1: selectedCatCard.dataset.parent1,
+    });
   } else {
     selectedCatFavorite.textContent = "♡";
+    removeFavorite(selectedCatCard.dataset.id);
   }
-
-  const selectedCatCard = e.target.closest("[data-dna]");
-
-  saveFavorite({
-    dna: selectedCatCard.dataset.dna,
-  });
 }
-
+// Save Favorites, persist to server
+/**
+ *
+ * @param {Object} catObj the cat to be stored
+ */
 function saveFavorite(catObj) {
   fetch("http://localhost:3000/cats", {
     method: "POST",
@@ -299,9 +341,18 @@ function saveFavorite(catObj) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(catObj),
-  })
-    .then((resp) => resp.json())
-    .then((cat) => console.log(cat));
+  });
+}
+
+// Remove Favorites, persist to server
+/**
+ *
+ * @param {number} id of the cat to be removed
+ */
+function removeFavorite(id) {
+  fetch(`http://localhost:3000/cats/${id}`, {
+    method: "DELETE",
+  });
 }
 
 // Handle Set Free! button
@@ -317,20 +368,41 @@ function setFreeHandler(e) {
   catToSetFree.parentNode.parentNode.remove();
 }
 
+// Fetch favorite cats on page load
+function renderFavoriteCats() {
+  fetch(" http://localhost:3000/cats")
+    .then((resp) => resp.json())
+    .then((catRecords) => {
+      // for each faveCat
+      catRecords.forEach((record) => {
+        // render cat card for fav
+        // create instance of Cat
+        const cat = new Cat(
+          record.dna,
+          [record.parent0, record.parent1],
+          record.id
+        );
+        const catCard = renderCatCard(cat);
+        // append cat cards to the new cat grid
+        const grid = document.querySelector("#catGridNew");
+        appendCatCardToGrid(grid, catCard);
+      });
+    });
+}
+
 //Initialize: get data and render cats to the DOM
 function initialize() {
+  // generate and render 4 cat cards append to original grid
   const maxOrigCats = 4;
   for (let i = 0; i < maxOrigCats; i++) {
-    // generate random Cat
     const cat = Cat.generateRandom();
-    // render cat card
-    const catCard = renderCatCard(cat, false);
 
-    // append card to the origial grid
+    const catCard = renderCatCard(cat);
 
     const grid = document.querySelector("#catGridOrig");
     appendCatCardToGrid(grid, catCard);
   }
+  renderFavoriteCats();
 }
 
 // Set up prevent initialize for testing purposes

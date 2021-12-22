@@ -1,0 +1,16 @@
+{
+  "cats": [
+    {
+      "dna": "ELJHNDWAGUXBYZZRURPWMXWNYHHBDOGQ",
+      "parent0": "EJNWGXYZUPMWYHDGNHRXRWAYHZCSPQNV",
+      "parent1": "LHDAUBZRRWXNHBOQBYWEEXXBBCIAGCJR",
+      "id": 2
+    },
+    {
+      "dna": "ETLEJPHSNQDBWBAXGMUSXPBAYKZAZORO",
+      "parent0": "ELJHNDWAGUXBYZZRURPWMXWNYHHBDOGQ",
+      "parent1": "TEPSQBBXMSPAKAOOBZZJLJLZHKJRMQOK",
+      "id": 3
+    }
+  ]
+}
