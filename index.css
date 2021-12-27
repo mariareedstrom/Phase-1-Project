@@ -50,3 +50,11 @@ header.container {
 .favorites {
   background-color: indianred;
 }
+
+.favorite {
+  font-size: 24px;
+}
+
+.card .card-content {
+  padding: 4px;
+}
