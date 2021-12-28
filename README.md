@@ -2,6 +2,8 @@
 
 Interactive application that allows the user to generate new and unique kittens.
 
+![image of cats](./docs/images/cats-optimized.gif)
+
 ## Overview
 
 The Kitty-Cat Generator allows users to create new and unique kittens by choosing two existing cats. The cats all have unique “DNA”-strings and combining any two cats generates a new kitty whose “DNA”-string is a result of interlacing the strings of the parent cats (much like human DNA sequencing).
